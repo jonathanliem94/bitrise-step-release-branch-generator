@@ -34,7 +34,7 @@ inputs:
       title: Bitrise private key
       is_expand: true
       is_dont_change_value: true
-  - git_repo_url:
+  - git_repo_url: $GIT_REPOSITORY_URL
     opts:
       title: Git repository URL (ssh)
       summary: Git repository URL (ssh)
@@ -42,6 +42,7 @@ inputs:
         URL of the Git repository (must be ssh)
       is_expand: true
       is_required: true
+      is_dont_change_value: true
   - version_code_file: /buildscripts/dependencies.gradle
     opts:
       title: versionCode File
