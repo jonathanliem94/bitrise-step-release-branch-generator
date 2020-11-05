@@ -62,11 +62,11 @@ func gitCommit(repo *git.Repository, commitMsg string) error {
 
 func gitTag(repo *git.Repository, tagName string) error {
 	head, _ := repo.Head()
-	_, _ = fmt.Fprintf(os.Stdout, "Attempting to tag HEAD with: %s", tagName)
+	_, _ = fmt.Fprintf(os.Stdout, "Attempting to tag HEAD with: %s\n", tagName)
 	_, err := repo.CreateTag(tagName, head.Hash(), nil)
 
 	if err != nil {
-		return errors.New(fmt.Sprintf("error creating tag: %v", err))
+		return errors.New(fmt.Sprintf("error creating tag: %v\n", err))
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func gitPushBranch(repo *git.Repository, auth transport.AuthMethod, branchName s
 		if err == git.NoErrAlreadyUpToDate {
 			return nil
 		}
-		return errors.New(fmt.Sprintf("unable to push branch: %v", err))
+		return errors.New(fmt.Sprintf("unable to push branch: %v\n", err))
 	}
 	return nil
 }

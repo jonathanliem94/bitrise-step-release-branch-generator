@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/log"
@@ -94,7 +95,7 @@ func updateBuildNo(repo *git.Repository, cfg *Config) error {
 	return nil
 }
 
-func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (string, error) {
+func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (*string, error) {
 	now := time.Now()
 	funcMap := template.FuncMap{
 		"Week":
@@ -121,12 +122,7 @@ func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (string, error) {
 	})
 
 	if err != nil {
-		fail("%v", err)
-	}
-
-	err = wt.AddGlob(".")
-	if err != nil {
-		fail("%v", err)
+		return nil, errors.New("unable to checkout release branch\n")
 	}
 
 	_, err = wt.Commit("diverge from master", &git.CommitOptions{
@@ -138,39 +134,39 @@ func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (string, error) {
 	})
 
 	if err != nil {
-		fail("%v", err)
+		return nil, errors.New("unable to create diverge commit\n")
 	}
 
-	return newBranch.String(), nil
+	return &branchName, nil
 }
 
 func main() {
 	var cfg Config
 	if err := stepconf.Parse(&cfg); err != nil {
-		fail("Error parsing config: %s", err)
+		fail("Error parsing config: %s\n", err)
 	}
 	stepconf.Print(cfg)
 
 	var err error
 	pk, err := getPublicKey(&cfg)
 	if err != nil {
-		fail("%v", err)
+		fail("%v\n", err)
 	}
 	repo, err := gitCloneMaster(cfg.CloneUrl, cfg.SourceDir, pk)
 	if err != nil {
-		fail("%v", err)
+		fail("%v\n", err)
 	}
 	_ = updateBuildNo(repo, &cfg)
 	err = gitPushBranch(repo, pk, "master")
 
 	if err != nil {
-		fail("%v", err)
+		fail("%v\n", err)
 	}
 
 	branchName, _ := forkNewReleaseBranch(repo, &cfg)
-	err = gitPushBranch(repo, pk, branchName)
+	err = gitPushBranch(repo, pk, *branchName)
 	if err != nil {
-		fail("%v", err)
+		fail("%v\n", err)
 	}
 
 	tags := strings.Split(cfg.TagsToPush, "\n")
@@ -179,6 +175,6 @@ func main() {
 	}
 	err = gitPushTag(repo, pk, nil) // push all tags
 	if err != nil {
-		fail("%v", err)
+		fail("%v\n", err)
 	}
 }
