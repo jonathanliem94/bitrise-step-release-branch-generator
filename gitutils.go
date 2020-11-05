@@ -15,11 +15,11 @@ import (
 
 func gitCloneMaster(url string, path string, auth transport.AuthMethod) (*git.Repository, error) {
 	repo, err := git.PlainClone(path, false, &git.CloneOptions{
-		URL:               url,
-		Auth:              auth,
-		ReferenceName:     "refs/heads/master",
-		Progress:          os.Stdout,
-		Tags:              git.NoTags,
+		URL:           url,
+		Auth:          auth,
+		ReferenceName: "refs/heads/master",
+		Progress:      os.Stdout,
+		Tags:          git.NoTags,
 	})
 	return repo, err
 }
@@ -87,18 +87,14 @@ func gitPushTag(repo *git.Repository, tagName *string) {
 	}
 }
 
-func gitPushBranch(repo *git.Repository, branchName string) error {
+func gitPushBranch(repo *git.Repository, auth transport.AuthMethod, branchName string) error {
 	refSpec := config.RefSpec(fmt.Sprintf("refs/heads/%[1]s:refs/heads/%[1]s", branchName))
-	pk, err := getPublicKey()
-	if err != nil {
-		return err
-	}
 	opts := git.PushOptions{
 		RefSpecs: []config.RefSpec{refSpec},
 		Progress: os.Stdout,
-		Auth: pk,
+		Auth:     auth,
 	}
-	err = repo.Push(&opts)
+	err := repo.Push(&opts)
 	if err != nil {
 		if err == git.NoErrAlreadyUpToDate {
 			return nil
@@ -108,9 +104,8 @@ func gitPushBranch(repo *git.Repository, branchName string) error {
 	return nil
 }
 
-func getPublicKey() (*ssh.PublicKeys, error) {
-	pkFile := "/Users/viel/.ssh/bitrise_pk"
-	sshPk, err  := ssh.NewPublicKeysFromFile("git", pkFile, "")
+func getPublicKey(cfg *Config) (*ssh.PublicKeys, error) {
+	sshPk, err := ssh.NewPublicKeysFromFile("git", cfg.SSHPrivateKeyPath, "")
 	if err != nil {
 		return nil, err
 	}
