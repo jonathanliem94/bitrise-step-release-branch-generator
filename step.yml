@@ -1,18 +1,6 @@
-#
-# A couple of useful guides & docs:
-#
-# - Main Bitrise CLI docs: https://github.com/bitrise-io/bitrise/tree/master/_docs
-# - Step Development Guideline: https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
-# - Bitrise.yml format spec: https://github.com/bitrise-io/bitrise/blob/master/_docs/bitrise-yml-format-spec.md
-# - Bitrise docs: http://devcenter.bitrise.io/
-# - Bitrise CLI guides: http://devcenter.bitrise.io/bitrise-cli/
-
-title: |-
-  Release Branch Generator
-summary: |
-  Creates a new release branch based on the  current week
-description: |
-  Creates a new release branch based on the currrreent week
+title: Release Branch Generator
+summary: Creates a new release branch based on the  current week
+description: Creates a new release branch based on the currrreent week
 website: https://github.com/vielasis/bitrise-step-release-branch-generator
 source_code_url: https://github.com/vielasis/bitrise-step-release-branch-generator
 support_url: https://github.com/vielasis/bitrise-step-release-branch-generator/issues
@@ -20,27 +8,6 @@ host_os_tags:
   - osx-10.10
   - ubuntu-16.04
 
-# If this step should be available only for certain project types
-# just uncomment this `project_type_tags` section and include all the
-# project types supported by the step. If the step can be used for all
-# project types then you can just remove this section.
-# If no `project_type_tags` specified (or specified as an empty array)
-# that means the step can be used for any project type.
-# You can find more information about project type tags in the Step Development Guideline:
-# https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
-#
-# project_type_tags:
-#   - ios
-#   - macos
-#   - android
-#   - xamarin
-#   - react-native
-#   - cordova
-#   - ionic
-
-# Type tags are used for categorizing steps, for easier step discovery in Step Libraries.
-# You can find more information about type tags in the Step Development Guideline:
-# https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md
 type_tags:
   - utility
 
@@ -57,31 +24,59 @@ deps:
   - name: git
   - name: wget
 
-
 toolkit:
   go:
     package_name: github.com/vielasis/bitrise-step-release-branch-generator
 
-
 inputs:
-  - example_step_input: Default Value - you can leave this empty if you want to
+  - git_repo_url:
     opts:
-      title: "Example Step Input"
-      summary: Summary. No more than 2-3 sentences.
+      title: Git repository URL (ssh)
+      summary: Git repository URL (ssh)
       description: |
-        Description of this input.
-
-        Can be Markdown formatted text.
+        URL of the Git repository (must be ssh)
       is_expand: true
       is_required: true
-      value_options: []
+  - version_code_file: /buildscripts/dependencies.gradle
+    opts:
+      title: versionCode File
+      summary: versionCode File
+      description: |
+        File where the versionCode is parsed
+      is_expand: true
+      is_required: true
+  - release_branch_template: "{{with $newdate := .AddDate 0 0 7}}release/{{$newdate.Year}}w{{Week $newdate}}{{end}}"
+    opts:
+      title: Release Branch Template
+      summary: Release Branch Template
+      description: |
+        Must be a valid go template
+      is_expand: false
+      is_required: true
+  - version_code_template: "{{add . 1}}"
+    opts:
+      title: Version Code Template
+      summary: Version Code Template
+      description: |
+        Must be a valid go template
+      is_expand: false
+      is_required: true
+  - version_code_regex: buildVersionCode
+    opts:
+      title: Version Code Regex
+      summary: Version Code Regex
+      description: |
+        Regex used to determine that the line from versionCode file contains the used versionCode
+      is_expand: false
+      is_required: true
+  - tags_to_push:
+    opts:
+      title: Tags to push
+      summary: Tags to push
+      description: |
+        Tags to be pushed, separate individual tags with a NEWLINE
+      is_expand: false
+      is_required: true
 
 outputs:
-  - EXAMPLE_STEP_OUTPUT:
-    opts:
-      title: "Example Step Output"
-      summary: Summary. No more than 2-3 sentences.
-      description: |
-        Description of this output.
 
-        Can be Markdown formatted text.
