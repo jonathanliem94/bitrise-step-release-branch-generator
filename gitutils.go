@@ -119,8 +119,7 @@ func getPublicKey(cfg *Config) (*ssh.PublicKeys, error) {
 }
 
 func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Config) error {
-	path := config.SourceDir + config.TagFile
-	file, _ := os.OpenFile(path, os.O_RDONLY, 0644)
+	file, _ := os.OpenFile(config.tagFilePath(), os.O_RDONLY, 0644)
 	defer file.Close()
 	reader := bufio.NewScanner(file)
 
