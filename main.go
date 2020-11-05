@@ -169,12 +169,14 @@ func main() {
 		fail("%v\n", err)
 	}
 
-	tags := strings.Split(cfg.TagsToPush, "\n")
-	for _, tag := range tags {
-		gitTag(repo, tag)
-	}
-	err = gitPushTag(repo, pk, nil) // push all tags
-	if err != nil {
-		fail("%v\n", err)
+	if cfg.TagsToPush != "" {
+		tags := strings.Split(cfg.TagsToPush, "\n")
+		for _, tag := range tags {
+			gitTag(repo, tag)
+		}
+		err = gitPushTag(repo, pk, nil) // push all tags
+		if err != nil {
+			fail("%v\n", err)
+		}
 	}
 }
