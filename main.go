@@ -25,7 +25,7 @@ type Config struct {
 	ReleaseBranchTemplate string `env:"release_branch_template,required"`
 	VersionCodeTemplate   string `env:"version_code_template,required"`
 	VersionCodeRegex      string `env:"version_code_regex,required"`
-	TagsToPush            string `env:"tags_to_push,required"`
+	TagFile               string `env:"tag_file,required"`
 }
 
 func fail(format string, args ...interface{}) {
@@ -147,7 +147,6 @@ func main() {
 	}
 	stepconf.Print(cfg)
 
-	var err error
 	pk, err := getPublicKey(&cfg)
 	if err != nil {
 		fail("%v\n", err)
@@ -157,26 +156,17 @@ func main() {
 		fail("%v\n", err)
 	}
 	_ = updateBuildNo(repo, &cfg)
-	err = gitPushBranch(repo, pk, "master")
 
-	if err != nil {
+	if err := gitPushBranch(repo, pk, "master"); err != nil {
 		fail("%v\n", err)
 	}
 
 	branchName, _ := forkNewReleaseBranch(repo, &cfg)
-	err = gitPushBranch(repo, pk, *branchName)
-	if err != nil {
+	if err := gitPushBranch(repo, pk, *branchName); err != nil {
 		fail("%v\n", err)
 	}
 
-	if cfg.TagsToPush != "" {
-		tags := strings.Split(cfg.TagsToPush, "\n")
-		for _, tag := range tags {
-			gitTag(repo, tag)
-		}
-		err = gitPushTag(repo, pk, nil) // push all tags
-		if err != nil {
-			fail("%v\n", err)
-		}
+	if err := processTagFile(repo, pk, cfg.TagFile); err != nil {
+		fail("%v", err)
 	}
 }

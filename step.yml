@@ -75,12 +75,12 @@ inputs:
         Regex used to determine that the line from versionCode file contains the used versionCode
       is_expand: false
       is_required: true
-  - tags_to_push:
+  - tag_file: /TAGFILE.txt
     opts:
-      title: Tags to push
-      summary: Tags to push
+      title: Tagfile path
+      summary: Tagfile path
       description: |
-        Tags to be pushed, separate individual tags with a NEWLINE
+        File containing the tags to be pushed
       is_expand: false
       is_required: true
 

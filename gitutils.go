@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/go-git/go-git/v5"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -114,4 +116,33 @@ func getPublicKey(cfg *Config) (*ssh.PublicKeys, error) {
 		return nil, err
 	}
 	return sshPk, err
+}
+
+func processTagFile(repo *git.Repository, auth transport.AuthMethod, path string) error {
+	file, err := os.OpenFile(path, os.O_RDONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	reader  := bufio.NewScanner(file)
+
+	var tags []string
+
+	for reader.Scan() {
+		line := strings.TrimSpace(reader.Text())
+		if !strings.HasPrefix(line, "#") && line != "" {
+			tags = append(tags, line)
+		}
+	}
+	if len(tags) == 0 {
+		return nil
+	}
+	for _, tag := range tags {
+		gitTag(repo, tag)
+	}
+	err = gitPushTag(repo, auth, nil) // push all tags
+	if err != nil {
+		return errors.New("unable to push tags\n")
+	}
+	return nil
 }
