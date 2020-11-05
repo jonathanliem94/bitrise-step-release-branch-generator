@@ -43,7 +43,7 @@ inputs:
       is_expand: true
       is_required: true
       is_dont_change_value: true
-  - version_code_file: /buildscripts/dependencies.gradle
+  - version_code_file: buildscripts/dependencies.gradle
     opts:
       title: versionCode File
       summary: versionCode File
@@ -75,7 +75,7 @@ inputs:
         Regex used to determine that the line from versionCode file contains the used versionCode
       is_expand: false
       is_required: true
-  - tag_file: /TAGFILE.txt
+  - tag_file: TAGFILE.txt
     opts:
       title: Tagfile path
       summary: Tagfile path

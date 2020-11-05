@@ -21,7 +21,7 @@ func gitCloneMaster(url string, path string, auth transport.AuthMethod) (*git.Re
 		Auth:          auth,
 		ReferenceName: "refs/heads/master",
 		Progress:      os.Stdout,
-		Tags:          git.NoTags,
+		Tags:          git.AllTags,
 	})
 	return repo, err
 }
@@ -73,10 +73,10 @@ func gitTag(repo *git.Repository, tagName string) error {
 	return nil
 }
 
-func gitPushTag(repo *git.Repository, auth transport.AuthMethod, tagName *string) error {
+func gitPushTag(repo *git.Repository, auth transport.AuthMethod, tagName string) error {
 	refSpec := config.RefSpec("refs/tags/*:refs/tags/*")
-	if tagName != nil {
-		refSpec = config.RefSpec(fmt.Sprintf("refs/tags/%[1]s:refs/tags/%[1]s", *tagName))
+	if tagName != "" {
+		refSpec = config.RefSpec(fmt.Sprintf("refs/tags/%[1]s:refs/tags/%[1]s", tagName))
 	}
 	opts := git.PushOptions{
 		RefSpecs: []config.RefSpec{refSpec},
@@ -118,15 +118,14 @@ func getPublicKey(cfg *Config) (*ssh.PublicKeys, error) {
 	return sshPk, err
 }
 
-func processTagFile(repo *git.Repository, auth transport.AuthMethod, path string) error {
-	file, err := os.OpenFile(path, os.O_RDONLY, 0644)
-	if err != nil {
-		return err
-	}
+func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Config) error {
+	path := config.SourceDir + config.TagFile
+	file, _ := os.OpenFile(path, os.O_RDONLY, 0644)
 	defer file.Close()
-	reader  := bufio.NewScanner(file)
+	reader := bufio.NewScanner(file)
 
 	var tags []string
+	var tagsToPush []string
 
 	for reader.Scan() {
 		line := strings.TrimSpace(reader.Text())
@@ -138,11 +137,19 @@ func processTagFile(repo *git.Repository, auth transport.AuthMethod, path string
 		return nil
 	}
 	for _, tag := range tags {
-		gitTag(repo, tag)
+		if err := gitTag(repo, tag); err != nil {
+			if err == git.ErrTagExists {
+				fmt.Fprintf(os.Stderr, "WARN: tag %s already exists in local! Skipipng\n", tag)
+			} else {
+				return err
+			}
+		}
+		tagsToPush = append(tagsToPush, tag)
 	}
-	err = gitPushTag(repo, auth, nil) // push all tags
-	if err != nil {
-		return errors.New("unable to push tags\n")
+	for _, tagToPush := range tagsToPush {
+		if err := gitPushTag(repo, auth, tagToPush); err != nil {
+			return err
+		}
 	}
 	return nil
 }

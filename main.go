@@ -28,14 +28,21 @@ type Config struct {
 	TagFile               string `env:"tag_file,required"`
 }
 
+func (cfg *Config) versionCodeFilePath() string {
+	return fmt.Sprintf("%s/%s", cfg.SourceDir, cfg.VersionCodeFile)
+}
+
+func (cfg *Config) tagFilePath() string {
+	return fmt.Sprintf("%s/%s", cfg.SourceDir, cfg.TagFile)
+}
+
 func fail(format string, args ...interface{}) {
 	log.Errorf(format, args...)
 	os.Exit(1)
 }
 
 func updateBuildNo(repo *git.Repository, cfg *Config) error {
-	path := cfg.SourceDir + cfg.VersionCodeFile
-	file, _ := os.OpenFile(path, os.O_RDWR, 0644)
+	file, _ := os.OpenFile(cfg.versionCodeFilePath(), os.O_RDWR, 0644)
 	defer file.Close()
 	reader := bufio.NewScanner(file)
 	writer := bufio.NewWriter(file)
@@ -141,13 +148,13 @@ func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (*string, error) {
 }
 
 func main() {
-	var cfg Config
-	if err := stepconf.Parse(&cfg); err != nil {
+	var cfg = &Config{}
+	if err := stepconf.Parse(cfg); err != nil {
 		fail("Error parsing config: %s\n", err)
 	}
 	stepconf.Print(cfg)
 
-	pk, err := getPublicKey(&cfg)
+	pk, err := getPublicKey(cfg)
 	if err != nil {
 		fail("%v\n", err)
 	}
@@ -155,18 +162,18 @@ func main() {
 	if err != nil {
 		fail("%v\n", err)
 	}
-	_ = updateBuildNo(repo, &cfg)
+	_ = updateBuildNo(repo, cfg)
 
 	if err := gitPushBranch(repo, pk, "master"); err != nil {
 		fail("%v\n", err)
 	}
 
-	branchName, _ := forkNewReleaseBranch(repo, &cfg)
+	branchName, _ := forkNewReleaseBranch(repo, cfg)
 	if err := gitPushBranch(repo, pk, *branchName); err != nil {
 		fail("%v\n", err)
 	}
 
-	if err := processTagFile(repo, pk, cfg.TagFile); err != nil {
+	if err := processTagFile(repo, pk, cfg); err != nil {
 		fail("%v", err)
 	}
 }
