@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/go-git/go-git/v5"
@@ -106,7 +107,9 @@ func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (string, error) {
 	var out bytes.Buffer
 	t1, _ := template.New("mutate").Funcs(funcMap).Parse(cfg.ReleaseBranchTemplate)
 	_ = t1.Execute(&out, now)
-	newBranch := gitRefName(out.String())
+	branchName := out.String()
+	_, _ = fmt.Fprintf(os.Stdout, "Attempting to create branch: %s", branchName)
+	newBranch := gitRefName(branchName)
 
 	wt, _ := repo.Worktree()
 	head, _ := repo.Head()
@@ -151,21 +154,31 @@ func main() {
 	var err error
 	pk, err := getPublicKey(&cfg)
 	if err != nil {
-		return
+		fail("%v", err)
 	}
-	repo, _ := gitCloneMaster(cfg.CloneUrl, cfg.SourceDir, pk)
-	updateBuildNo(repo, &cfg)
+	repo, err := gitCloneMaster(cfg.CloneUrl, cfg.SourceDir, pk)
+	if err != nil {
+		fail("%v", err)
+	}
+	_ = updateBuildNo(repo, &cfg)
 	err = gitPushBranch(repo, pk, "master")
 
 	if err != nil {
-		return
+		fail("%v", err)
 	}
 
 	branchName, _ := forkNewReleaseBranch(repo, &cfg)
-	gitPushBranch(repo, pk, branchName)
+	err = gitPushBranch(repo, pk, branchName)
+	if err != nil {
+		fail("%v", err)
+	}
+
 	tags := strings.Split(cfg.TagsToPush, "\n")
 	for _, tag := range tags {
 		gitTag(repo, tag)
 	}
-	gitPushTag(repo, nil) // push all tags
+	err = gitPushTag(repo, pk, nil) // push all tags
+	if err != nil {
+		fail("%v", err)
+	}
 }

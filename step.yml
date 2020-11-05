@@ -30,10 +30,10 @@ toolkit:
 
 inputs:
   - ssh_key_save_path: "$HOME/.ssh/bitrise_step_activate_ssh_key"
-      opts:
-        title: Bitrise private key
-        is_expand: true
-        is_dont_change_value: true
+    opts:
+      title: Bitrise private key
+      is_expand: true
+      is_dont_change_value: true
   - git_repo_url:
     opts:
       title: Git repository URL (ssh)

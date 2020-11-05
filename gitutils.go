@@ -62,6 +62,7 @@ func gitCommit(repo *git.Repository, commitMsg string) error {
 
 func gitTag(repo *git.Repository, tagName string) error {
 	head, _ := repo.Head()
+	_, _ = fmt.Fprintf(os.Stdout, "Attempting to tag HEAD with: %s", tagName)
 	_, err := repo.CreateTag(tagName, head.Hash(), nil)
 
 	if err != nil {
@@ -70,21 +71,24 @@ func gitTag(repo *git.Repository, tagName string) error {
 	return nil
 }
 
-func gitPushTag(repo *git.Repository, tagName *string) {
-	refSpec := config.RefSpec("refs/tags/*:/refs/tags/*")
+func gitPushTag(repo *git.Repository, auth transport.AuthMethod, tagName *string) error {
+	refSpec := config.RefSpec("refs/tags/*:refs/tags/*")
 	if tagName != nil {
 		refSpec = config.RefSpec(fmt.Sprintf("refs/tags/%[1]s:refs/tags/%[1]s", *tagName))
 	}
 	opts := git.PushOptions{
 		RefSpecs: []config.RefSpec{refSpec},
 		Progress: os.Stdout,
+		Auth: auth,
 	}
 	err := repo.Push(&opts)
 	if err != nil {
 		if err == git.NoErrAlreadyUpToDate {
-			return
+			return nil
 		}
+		return err
 	}
+	return nil
 }
 
 func gitPushBranch(repo *git.Repository, auth transport.AuthMethod, branchName string) error {
