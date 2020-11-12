@@ -166,16 +166,16 @@ func main() {
 	}
 	_ = updateBuildNo(repo, cfg)
 
-	if err := gitPushBranch(repo, pk, "master"); err != nil {
-		fail("%v\n", err)
-	}
+	//if err := gitPushBranch(repo, pk, "master"); err != nil {
+	//	fail("%v\n", err)
+	//}
 
 	branchName, _ := forkNewReleaseBranch(repo, cfg)
 	if err := gitPushBranch(repo, pk, *branchName); err != nil {
 		fail("%v\n", err)
 	}
 
-	if err := processTagFile(repo, pk, cfg); err != nil {
-		fail("%v", err)
-	}
+	//if err := processTagFile(repo, pk, cfg); err != nil {
+	//	fail("%v", err)
+	//}
 }
