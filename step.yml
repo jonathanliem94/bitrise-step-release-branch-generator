@@ -36,13 +36,29 @@ inputs:
       is_dont_change_value: true
   - git_repo_url: $GIT_REPOSITORY_URL
     opts:
-      title: Git repository URL (ssh)
-      summary: Git repository URL (ssh)
+      title: Git clone URL
+      summary: Git clone URL
       description: |
-        URL of the Git repository (must be ssh)
+        URL of the Git repository. This is the arg you use in `git clone`
       is_expand: true
       is_required: true
-      is_dont_change_value: true
+  - git_http_username:
+    opts:
+      title: Clone username
+      summary: Username for cloning in http mode
+      description: |
+        Username for cloning in http mode
+      is_expand: true
+      is_required: true
+  - access_token:
+    opts:
+      title: Clone password
+      summary: Password for cloning in http mode
+      description: |
+        Password for cloning in http mode
+      is_expand: false
+      is_required: true
+      is_sensitive: true
   - version_code_file: buildscripts/dependencies.gradle
     opts:
       title: versionCode File

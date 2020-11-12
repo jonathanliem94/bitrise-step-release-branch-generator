@@ -9,6 +9,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"os"
 	"strings"
@@ -81,7 +82,7 @@ func gitPushTag(repo *git.Repository, auth transport.AuthMethod, tagName string)
 	opts := git.PushOptions{
 		RefSpecs: []config.RefSpec{refSpec},
 		Progress: os.Stdout,
-		Auth: auth,
+		Auth:     auth,
 	}
 	err := repo.Push(&opts)
 	if err != nil {
@@ -110,12 +111,20 @@ func gitPushBranch(repo *git.Repository, auth transport.AuthMethod, branchName s
 	return nil
 }
 
-func getPublicKey(cfg *Config) (*ssh.PublicKeys, error) {
-	sshPk, err := ssh.NewPublicKeysFromFile("git", cfg.SSHPrivateKeyPath, "")
-	if err != nil {
-		return nil, err
+func getGitAuth(cfg *Config) (transport.AuthMethod, error) {
+	if strings.HasPrefix(cfg.CloneUrl, "http") {
+		auth := &http.BasicAuth{
+			Username: cfg.Username,
+			Password: string(cfg.AccessToken),
+		}
+		return auth, nil
+	} else {
+		sshPk, err := ssh.NewPublicKeysFromFile("git", cfg.SSHPrivateKeyPath, "")
+		if err != nil {
+			return nil, err
+		}
+		return sshPk, err
 	}
-	return sshPk, err
 }
 
 func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Config) error {

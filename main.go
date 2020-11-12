@@ -18,14 +18,16 @@ import (
 )
 
 type Config struct {
-	SourceDir             string `env:"BITRISE_SOURCE_DIR,required"`
-	SSHPrivateKeyPath     string `env:"ssh_key_save_path,required"`
-	CloneUrl              string `env:"git_repo_url,required"`
-	VersionCodeFile       string `env:"version_code_file,required"`
-	ReleaseBranchTemplate string `env:"release_branch_template,required"`
-	VersionCodeTemplate   string `env:"version_code_template,required"`
-	VersionCodeRegex      string `env:"version_code_regex,required"`
-	TagFile               string `env:"tag_file,required"`
+	SourceDir             string          `env:"BITRISE_SOURCE_DIR,required"`
+	SSHPrivateKeyPath     string          `env:"ssh_key_save_path,required"`
+	Username              string          `env:"git_http_username,required"`
+	AccessToken           stepconf.Secret `env:"access_token,required"`
+	CloneUrl              string          `env:"git_repo_url,required"`
+	VersionCodeFile       string          `env:"version_code_file,required"`
+	ReleaseBranchTemplate string          `env:"release_branch_template,required"`
+	VersionCodeTemplate   string          `env:"version_code_template,required"`
+	VersionCodeRegex      string          `env:"version_code_regex,required"`
+	TagFile               string          `env:"tag_file,required"`
 }
 
 func (cfg *Config) versionCodeFilePath() string {
@@ -154,7 +156,7 @@ func main() {
 	}
 	stepconf.Print(cfg)
 
-	pk, err := getPublicKey(cfg)
+	pk, err := getGitAuth(cfg)
 	if err != nil {
 		fail("%v\n", err)
 	}
