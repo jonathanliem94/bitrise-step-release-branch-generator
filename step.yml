@@ -56,7 +56,7 @@ inputs:
       summary: Password for cloning in http mode
       description: |
         Password for cloning in http mode
-      is_expand: false
+      is_expand: true
       is_required: true
       is_sensitive: true
   - version_code_file: buildscripts/dependencies.gradle
