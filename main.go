@@ -28,6 +28,7 @@ type Config struct {
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
 	TagFile               string          `env:"tag_file,required"`
+	TagFileTemplete       string          `env:"tag_file_template,required"`
 }
 
 func (cfg *Config) versionCodeFilePath() string {
@@ -43,7 +44,7 @@ func fail(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func updateBuildNo(repo *git.Repository, cfg *Config) error {
+func updateBuildNo(cfg *Config) error {
 	file, _ := os.OpenFile(cfg.versionCodeFilePath(), os.O_RDWR, 0644)
 	defer file.Close()
 	reader := bufio.NewScanner(file)
@@ -98,8 +99,70 @@ func updateBuildNo(repo *git.Repository, cfg *Config) error {
 		return err
 	}
 
-	_ = gitAddAll(repo)
-	_ = gitCommit(repo, "[skip ci] Update Version Code")
+	return nil
+}
+
+func updateTagFile(cfg *Config) error {
+	type Semver struct {
+		Major  int
+		Minor  int
+		Rev    int
+		Suffix string
+	}
+	file, _ := os.OpenFile(cfg.tagFilePath(), os.O_RDWR, 0644)
+	defer file.Close()
+	reader := bufio.NewScanner(file)
+	writer := bufio.NewWriter(file)
+
+	tagFileRe := regexp.MustCompile(`(?P<Major>\d+)\.(?P<Minor>\d+)\.(?P<Rev>\d+)-(?P<Suffix>.+)`)
+	var lines []string
+
+	replaced := false
+	for reader.Scan() {
+		line := reader.Text()
+		if len(line) > 0 && !strings.HasPrefix(line, "#") {
+			matches := tagFileRe.FindStringSubmatch(line)
+			paramsMap := make(map[string]string)
+			for i, name := range tagFileRe.SubexpNames() {
+				if i > 0 && i < len(matches) {
+					paramsMap[name] = matches[i]
+				}
+			}
+			major, err := strconv.Atoi(paramsMap["Major"])
+			minor, err := strconv.Atoi(paramsMap["Minor"])
+			rev, err := strconv.Atoi(paramsMap["Rev"])
+			semver := Semver{Major: major, Minor: minor, Rev: rev, Suffix: paramsMap["Suffix"]}
+			if err != nil {
+				fail("Unable to update tagfile, tag format is not using semantic versioning")
+			}
+			var out bytes.Buffer
+			funcMap := template.FuncMap{
+				"add":
+				func(i int, what int) int {
+					return i + what
+				},
+			}
+			t1, _ := template.New("semver").Funcs(funcMap).Parse(cfg.TagFileTemplete)
+			_ = t1.Execute(&out, semver)
+			line = out.String()
+			replaced = true
+		}
+		lines = append(lines, line)
+	}
+
+	if !replaced {
+		fail("failed")
+	}
+
+	_, _ = file.Seek(0, 0)
+	for _, line := range lines {
+		_, _ = writer.WriteString(line)
+		_ = writer.WriteByte(10)
+	}
+	err := writer.Flush()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -164,7 +227,10 @@ func main() {
 	if err != nil {
 		fail("%v\n", err)
 	}
-	_ = updateBuildNo(repo, cfg)
+	_ = updateBuildNo(cfg)
+	_ = updateTagFile(cfg)
+	_ = gitAddAll(repo)
+	_ = gitCommit(repo, "[skip ci] Update version, tagfile")
 
 	if err := gitPushBranch(repo, pk, "master"); err != nil {
 		fail("%v\n", err)
