@@ -4,6 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -11,9 +15,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"os"
-	"strings"
-	"time"
 )
 
 func gitCloneMaster(url string, path string, auth transport.AuthMethod) (*git.Repository, error) {
@@ -31,12 +32,16 @@ func gitRefName(name string) plumbing.ReferenceName {
 	return plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", name))
 }
 
-func gitCheckoutBranch(repo *git.Repository, branchName string) {
+func gitCheckoutBranch(repo *git.Repository, branchName string) error {
 	branch := gitRefName(branchName)
 	wt, _ := repo.Worktree()
-	_ = wt.Checkout(&git.CheckoutOptions{
+	err := wt.Checkout(&git.CheckoutOptions{
 		Branch: branch,
 	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func gitAddAll(repo *git.Repository) error {

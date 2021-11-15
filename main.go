@@ -5,16 +5,17 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-utils/log"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-utils/log"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type Config struct {
@@ -24,6 +25,7 @@ type Config struct {
 	AccessToken           stepconf.Secret `env:"access_token,required"`
 	CloneUrl              string          `env:"git_repo_url,required"`
 	VersionCodeFile       string          `env:"version_code_file,required"`
+	BranchName            string          `env:"branch_name,required"`
 	ReleaseBranchTemplate string          `env:"release_branch_template,required"`
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
@@ -72,8 +74,7 @@ func updateBuildNo(cfg *Config) error {
 
 			var out bytes.Buffer
 			funcMap := template.FuncMap{
-				"add":
-				func(i int, what int) int {
+				"add": func(i int, what int) int {
 					return i + what
 				},
 			}
@@ -137,8 +138,7 @@ func updateTagFile(cfg *Config) error {
 			}
 			var out bytes.Buffer
 			funcMap := template.FuncMap{
-				"add":
-				func(i int, what int) int {
+				"add": func(i int, what int) int {
 					return i + what
 				},
 			}
@@ -170,8 +170,7 @@ func updateTagFile(cfg *Config) error {
 func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (*string, error) {
 	now := time.Now()
 	funcMap := template.FuncMap{
-		"Week":
-		func(t time.Time) int {
+		"Week": func(t time.Time) int {
 			_, week := t.ISOWeek()
 			return week
 		},
@@ -227,6 +226,12 @@ func main() {
 	if err != nil {
 		fail("%v\n", err)
 	}
+
+	err = gitCheckoutBranch(repo, cfg.BranchName)
+	if err != nil {
+		fail("%v\n", err)
+	}
+
 	_ = updateBuildNo(cfg)
 	_ = updateTagFile(cfg)
 	_ = gitAddAll(repo)

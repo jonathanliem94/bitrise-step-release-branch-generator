@@ -1,9 +1,9 @@
 title: Release Branch Generator
 summary: Creates a new release branch based on the  current week
 description: Creates a new release branch based on the currrreent week
-website: https://github.com/vielasis/bitrise-step-release-branch-generator
-source_code_url: https://github.com/vielasis/bitrise-step-release-branch-generator
-support_url: https://github.com/vielasis/bitrise-step-release-branch-generator/issues
+website: https://github.com/circlesdevelopermobile/bitrise-step-release-branch-generator
+source_code_url: https://github.com/circlesdevelopermobile/bitrise-step-release-branch-generator
+support_url: https://github.com/circlesdevelopermobile/bitrise-step-release-branch-generator/issues
 host_os_tags:
   - osx-10.10
   - ubuntu-16.04
@@ -26,7 +26,7 @@ deps:
 
 toolkit:
   go:
-    package_name: github.com/vielasis/bitrise-step-release-branch-generator
+    package_name: github.com/circlesdevelopermobile/bitrise-step-release-branch-generator
 
 inputs:
   - ssh_key_save_path: "$HOME/.ssh/bitrise_step_activate_ssh_key"
@@ -59,6 +59,14 @@ inputs:
       is_expand: true
       is_required: true
       is_sensitive: true
+  - branch_name: master
+    opts:
+      title: Branch to checkout
+      summary: 
+      description: |
+        Branch that the release branch will originate from
+      is_expand: true
+      is_required: true
   - version_code_file: buildscripts/dependencies.gradle
     opts:
       title: versionCode File
