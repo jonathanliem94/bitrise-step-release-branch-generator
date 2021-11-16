@@ -119,7 +119,7 @@ inputs:
     opts:
       title: Tag suffix
       summary: Tag suffix
-      description: will be the suffix of the tag (and the value written in the TAGFILE)
+      description: will be the suffix of the tag (which will NOT be written in the TAGFILE)
       is_expand: false
       is_required: true
 
