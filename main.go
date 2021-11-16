@@ -30,7 +30,7 @@ type Config struct {
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
 	TagFile               string          `env:"tag_file,required"`
-	TagFileTemplete       string          `env:"tag_file_template,required"`
+	TagFileTemplate       string          `env:"tag_file_template,required"`
 }
 
 func (cfg *Config) versionCodeFilePath() string {
@@ -142,7 +142,7 @@ func updateTagFile(cfg *Config) error {
 					return i + what
 				},
 			}
-			t1, _ := template.New("semver").Funcs(funcMap).Parse(cfg.TagFileTemplete)
+			t1, _ := template.New("semver").Funcs(funcMap).Parse(cfg.TagFileTemplate)
 			_ = t1.Execute(&out, semver)
 			line = out.String()
 			replaced = true
