@@ -150,7 +150,15 @@ func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Con
 		return nil
 	}
 	for _, tag := range tags {
-		if err := gitTag(repo, tag); err != nil {
+
+		// Append suffix to tag parsed from tag file
+		var sb strings.Builder
+		sb.WriteString(tag)
+		sb.WriteString(config.TagNameSuffix)
+		newTagName := sb.String()
+
+		// Git tag locally
+		if err := gitTag(repo, newTagName); err != nil {
 			if err == git.ErrTagExists {
 				fmt.Fprintf(os.Stderr, "WARN: tag %s already exists in local! Skipipng\n", tag)
 			} else {

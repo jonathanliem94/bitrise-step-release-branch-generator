@@ -31,6 +31,7 @@ type Config struct {
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
 	TagFile               string          `env:"tag_file,required"`
 	TagFileTemplate       string          `env:"tag_file_template,required"`
+	TagNameSuffix         string          `env:"tag_name_suffix,required"`
 }
 
 func (cfg *Config) versionCodeFilePath() string {
@@ -105,17 +106,16 @@ func updateBuildNo(cfg *Config) error {
 
 func updateTagFile(cfg *Config) error {
 	type Semver struct {
-		Major  int
-		Minor  int
-		Rev    int
-		Suffix string
+		Major int
+		Minor int
+		Rev   int
 	}
 	file, _ := os.OpenFile(cfg.tagFilePath(), os.O_RDWR, 0644)
 	defer file.Close()
 	reader := bufio.NewScanner(file)
 	writer := bufio.NewWriter(file)
 
-	tagFileRe := regexp.MustCompile(`(?P<Major>\d+)\.(?P<Minor>\d+)\.(?P<Rev>\d+)-(?P<Suffix>.+)`)
+	tagFileRe := regexp.MustCompile(`(?P<Major>\d+)\.(?P<Minor>\d+)\.(?P<Rev>\d+)`)
 	var lines []string
 
 	replaced := false
@@ -132,7 +132,7 @@ func updateTagFile(cfg *Config) error {
 			major, err := strconv.Atoi(paramsMap["Major"])
 			minor, err := strconv.Atoi(paramsMap["Minor"])
 			rev, err := strconv.Atoi(paramsMap["Rev"])
-			semver := Semver{Major: major, Minor: minor, Rev: rev, Suffix: paramsMap["Suffix"]}
+			semver := Semver{Major: major, Minor: minor, Rev: rev}
 			if err != nil {
 				fail("Unable to update tagfile, tag format is not using semantic versioning")
 			}
