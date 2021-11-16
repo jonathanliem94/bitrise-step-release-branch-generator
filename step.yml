@@ -116,12 +116,12 @@ inputs:
       is_expand: false
       is_required: true
   - tag_name_suffix: "-ALL-RC1"
-      opts:
-        title: Tag suffix
-        summary: Tag suffix
-        description: will be the suffix of the tag (which will NOT be written in the TAGFILE)
-        is_expand: false
-        is_required: true
+    opts:
+      title: Tag suffix
+      summary: Tag suffix
+      description: will be the suffix of the tag (which will NOT be written in the TAGFILE)
+      is_expand: false
+      is_required: true
 
 outputs:
 
