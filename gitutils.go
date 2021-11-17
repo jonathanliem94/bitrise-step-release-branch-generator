@@ -160,7 +160,7 @@ func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Con
 		// Git tag locally
 		if err := gitTag(repo, newTagName); err != nil {
 			if err == git.ErrTagExists {
-				fmt.Fprintf(os.Stderr, "WARN: tag %s already exists in local! Skipipng\n", tag)
+				fmt.Fprintf(os.Stderr, "WARN: tag %s already exists in local! Skipping!\n", tag)
 			} else {
 				return err
 			}

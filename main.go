@@ -151,12 +151,17 @@ func updateTagFile(cfg *Config) error {
 	}
 
 	if !replaced {
-		fail("failed")
+		fail("failed to replace TAG\n")
 	}
 
+	truncateErr := file.Truncate(0)
+	if truncateErr != nil {
+		fail("failed to truncate! TAGFILE may not be updated properly! error: %s", truncateErr)
+	}
 	_, _ = file.Seek(0, 0)
 	for _, line := range lines {
 		_, _ = writer.WriteString(line)
+		// add new line
 		_ = writer.WriteByte(10)
 	}
 	err := writer.Flush()
@@ -180,7 +185,7 @@ func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (*string, error) {
 	t1, _ := template.New("mutate").Funcs(funcMap).Parse(cfg.ReleaseBranchTemplate)
 	_ = t1.Execute(&out, now)
 	branchName := out.String()
-	_, _ = fmt.Fprintf(os.Stdout, "Attempting to create branch: %s", branchName)
+	_, _ = fmt.Fprintf(os.Stdout, "Attempting to create branch: %s\n", branchName)
 	newBranch := gitRefName(branchName)
 
 	wt, _ := repo.Worktree()
