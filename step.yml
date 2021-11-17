@@ -59,14 +59,6 @@ inputs:
       is_expand: true
       is_required: true
       is_sensitive: true
-  - branch_name: master
-    opts:
-      title: Branch to checkout
-      summary: 
-      description: |
-        Branch that the release branch will originate from
-      is_expand: true
-      is_required: true
   - version_code_file: buildscripts/dependencies.gradle
     opts:
       title: versionCode File
