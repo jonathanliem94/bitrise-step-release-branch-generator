@@ -25,7 +25,6 @@ type Config struct {
 	AccessToken           stepconf.Secret `env:"access_token,required"`
 	CloneUrl              string          `env:"git_repo_url,required"`
 	VersionCodeFile       string          `env:"version_code_file,required"`
-	BranchName            string          `env:"branch_name,required"`
 	BitriseBranchName     string          `env:"BITRISE_GIT_BRANCH,required"`
 	ReleaseBranchTemplate string          `env:"release_branch_template,required"`
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
@@ -228,15 +227,11 @@ func main() {
 	if err != nil {
 		fail("getGitAuth failed: %v\n", err)
 	}
-	repo, err := gitCloneMaster(cfg.CloneUrl, cfg.SourceDir, pk)
-	if err != nil {
-		fail("gitCloneMaster failed: %v\n", err)
-	}
 
-	log.Infof("Branch to checkout: %s\n", cfg.BranchName)
-	err = gitCheckoutBranch(repo, cfg.BranchName)
+	log.Infof("Branch to checkout: %s\n", cfg.BitriseBranchName)
+	repo, err := gitClone(cfg.CloneUrl, cfg.SourceDir, cfg.BitriseBranchName, pk)
 	if err != nil {
-		fail("gitCheckoutBranch failed: %v\n", err)
+		fail("gitClone failed: %v\n", err)
 	}
 
 	_ = updateBuildNo(cfg)
@@ -244,7 +239,7 @@ func main() {
 	_ = gitAddAll(repo)
 	_ = gitCommit(repo, "[skip ci] Update version, tagfile")
 
-	if err := gitPushBranch(repo, pk, "master"); err != nil {
+	if err := gitPushBranch(repo, pk, cfg.BitriseBranchName); err != nil {
 		fail("gitPushBranch failed: %v\n", err)
 	}
 

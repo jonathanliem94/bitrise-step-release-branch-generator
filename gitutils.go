@@ -17,11 +17,12 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
-func gitCloneMaster(url string, path string, auth transport.AuthMethod) (*git.Repository, error) {
+func gitClone(url string, path string, branch string, auth transport.AuthMethod) (*git.Repository, error) {
+	refName := gitRefName(branch)
 	repo, err := git.PlainClone(path, false, &git.CloneOptions{
 		URL:           url,
 		Auth:          auth,
-		ReferenceName: "refs/heads/master",
+		ReferenceName: refName,
 		Progress:      os.Stdout,
 		Tags:          git.AllTags,
 	})
