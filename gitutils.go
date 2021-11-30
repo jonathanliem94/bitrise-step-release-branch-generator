@@ -81,6 +81,7 @@ func gitTag(repo *git.Repository, tagName string) error {
 }
 
 func gitPushTag(repo *git.Repository, auth transport.AuthMethod, tagName string) error {
+	fmt.Fprintf(os.Stdout, "Attempting to push tag %s\n", tagName)
 	refSpec := config.RefSpec("refs/tags/*:refs/tags/*")
 	if tagName != "" {
 		refSpec = config.RefSpec(fmt.Sprintf("refs/tags/%[1]s:refs/tags/%[1]s", tagName))
@@ -166,7 +167,7 @@ func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Con
 				return err
 			}
 		}
-		tagsToPush = append(tagsToPush, tag)
+		tagsToPush = append(tagsToPush, newTagName)
 	}
 	for _, tagToPush := range tagsToPush {
 		if err := gitPushTag(repo, auth, tagToPush); err != nil {
