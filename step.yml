@@ -83,14 +83,6 @@ inputs:
         Must be a valid go template
       is_expand: false
       is_required: true
-  - release_branch_suffix: $RELEASE_BRANCH_SUFFIX
-    opts:
-      title: Release Branch Suffix
-      summary: Release Branch Suffix
-      description: |
-        Must be a valid string
-      is_expand: false
-      is_required: true
   - version_code_template: "{{add . 1}}"
     opts:
       title: Version Code Template
@@ -121,13 +113,6 @@ inputs:
       summary: TAGFILE Template
       description: |
         Must be a valid go template
-      is_expand: false
-      is_required: true
-  - tag_name_suffix: $TAG_NAME_SUFFIX
-    opts:
-      title: Tag suffix
-      summary: Tag suffix
-      description: will be the suffix of the tag (which will NOT be written in the TAGFILE)
       is_expand: false
       is_required: true
   - debug_flag: true
