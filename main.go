@@ -27,6 +27,7 @@ type Config struct {
 	VersionCodeFile       string          `env:"version_code_file,required"`
 	BranchName            string          `env:"branch_name,required"`
 	ReleaseBranchTemplate string          `env:"release_branch_template,required"`
+	ReleaseBranchSuffix   string          `env:"release_branch_suffix,required"`
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
 	TagFile               string          `env:"tag_file,required"`
@@ -185,7 +186,14 @@ func forkNewReleaseBranch(repo *git.Repository, cfg *Config) (*string, error) {
 	var out bytes.Buffer
 	t1, _ := template.New("mutate").Funcs(funcMap).Parse(cfg.ReleaseBranchTemplate)
 	_ = t1.Execute(&out, now)
-	branchName := out.String()
+	branchNameWoSuffix := out.String()
+
+	// Append suffix to branch name
+	var sb strings.Builder
+	sb.WriteString(branchNameWoSuffix)
+	sb.WriteString(cfg.ReleaseBranchSuffix)
+	branchName := sb.String()
+
 	_, _ = fmt.Fprintf(os.Stdout, "Attempting to create branch: %s\n", branchName)
 	newBranch := gitRefName(branchName)
 

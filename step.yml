@@ -83,6 +83,14 @@ inputs:
         Must be a valid go template
       is_expand: false
       is_required: true
+  - release_branch_suffix: $RELEASE_BRANCH_SUFFIX
+    opts:
+      title: Release Branch Suffix
+      summary: Release Branch Suffix
+      description: |
+        Must be a valid string
+      is_expand: false
+      is_required: true
   - version_code_template: "{{add . 1}}"
     opts:
       title: Version Code Template
