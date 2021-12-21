@@ -32,6 +32,7 @@ type Config struct {
 	TagFile               string          `env:"tag_file,required"`
 	TagFileTemplate       string          `env:"tag_file_template,required"`
 	TagNameSuffix         string          `env:"tag_name_suffix,required"`
+	DebugFlag             bool            `env:"debug_flag,required"`
 }
 
 func (cfg *Config) versionCodeFilePath() string {
@@ -222,6 +223,11 @@ func main() {
 		fail("Error parsing config: %s\n", err)
 	}
 	stepconf.Print(cfg)
+
+	if cfg.DebugFlag {
+		_, _ = fmt.Fprintf(os.Stdout, "Debug Flag detected, exiting script.\n")
+		os.Exit(1)
+	}
 
 	pk, err := getGitAuth(cfg)
 	if err != nil {

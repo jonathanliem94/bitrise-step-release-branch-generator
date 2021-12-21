@@ -59,7 +59,7 @@ inputs:
       is_expand: true
       is_required: true
       is_sensitive: true
-  - branch_name: master
+  - branch_name: $BITRISE_GIT_BRANCH
     opts:
       title: Branch to clone
       summary: Branch to clone
@@ -120,6 +120,13 @@ inputs:
       title: Tag suffix
       summary: Tag suffix
       description: will be the suffix of the tag (which will NOT be written in the TAGFILE)
+      is_expand: false
+      is_required: true
+  - debug_flag: true
+    opts:
+      title: Debug flag
+      summary: Debug flag
+      description: If true, workflow will initialise, print the env variables used, and exit
       is_expand: false
       is_required: true
 
