@@ -233,8 +233,7 @@ func main() {
 	stepconf.Print(cfg)
 
 	if cfg.DebugFlag {
-		_, _ = fmt.Fprintf(os.Stdout, "Debug Flag detected, exiting script.\n")
-		os.Exit(1)
+		_, _ = fmt.Fprintf(os.Stdout, "LOG: Debug Flag detected.\n")
 	}
 
 	pk, err := getGitAuth(cfg)
@@ -253,13 +252,21 @@ func main() {
 	_ = gitAddAll(repo)
 	_ = gitCommit(repo, "[skip ci] Update version, tagfile")
 
-	if err := gitPushBranch(repo, pk, cfg.BranchName); err != nil {
-		fail("gitPushBranch failed: %v\n", err)
+	if cfg.DebugFlag {
+		_, _ = fmt.Fprintf(os.Stdout, "LOG: Debug Flag detected. Skipping pushing of branches\n")
+	} else {
+		if err := gitPushBranch(repo, pk, cfg.BranchName); err != nil {
+			fail("gitPushBranch failed: %v\n", err)
+		}
 	}
 
 	branchName, _ := forkNewReleaseBranch(repo, cfg)
-	if err := gitPushBranch(repo, pk, *branchName); err != nil {
-		fail("forkNewReleaseBranch & subsequent gitPushBranch failed: %v\n", err)
+	if cfg.DebugFlag {
+		_, _ = fmt.Fprintf(os.Stdout, "LOG: Debug Flag detected. Skipping pushing of branches\n")
+	} else {
+		if err := gitPushBranch(repo, pk, *branchName); err != nil {
+			fail("forkNewReleaseBranch & subsequent gitPushBranch failed: %v\n", err)
+		}
 	}
 
 	if err := processTagFile(repo, pk, cfg); err != nil {

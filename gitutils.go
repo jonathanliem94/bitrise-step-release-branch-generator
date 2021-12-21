@@ -169,9 +169,13 @@ func processTagFile(repo *git.Repository, auth transport.AuthMethod, config *Con
 		}
 		tagsToPush = append(tagsToPush, newTagName)
 	}
-	for _, tagToPush := range tagsToPush {
-		if err := gitPushTag(repo, auth, tagToPush); err != nil {
-			return err
+	if config.DebugFlag {
+		_, _ = fmt.Fprintf(os.Stdout, "LOG: Debug Flag detected. Skipping pushing of tags\n")
+	} else {
+		for _, tagToPush := range tagsToPush {
+			if err := gitPushTag(repo, auth, tagToPush); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
