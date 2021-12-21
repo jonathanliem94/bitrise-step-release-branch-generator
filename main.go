@@ -27,12 +27,12 @@ type Config struct {
 	VersionCodeFile       string          `env:"version_code_file,required"`
 	BranchName            string          `env:"branch_name,required"`
 	ReleaseBranchTemplate string          `env:"release_branch_template,required"`
-	ReleaseBranchSuffix   string          `env:"release_branch_suffix,required"`
+	ReleaseBranchSuffix   string          `env:"RELEASE_BRANCH_SUFFIX,required"`
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
 	TagFile               string          `env:"tag_file,required"`
 	TagFileTemplate       string          `env:"tag_file_template,required"`
-	TagNameSuffix         string          `env:"tag_name_suffix,required"`
+	TagNameSuffix         string          `env:"TAG_NAME_SUFFIX,required"`
 	DebugFlag             bool            `env:"debug_flag,required"`
 }
 
