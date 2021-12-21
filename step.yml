@@ -115,7 +115,7 @@ inputs:
         Must be a valid go template
       is_expand: false
       is_required: true
-  - tag_name_suffix: "-ALL-RC1"
+  - tag_name_suffix: $TAG_NAME_SUFFIX
     opts:
       title: Tag suffix
       summary: Tag suffix
