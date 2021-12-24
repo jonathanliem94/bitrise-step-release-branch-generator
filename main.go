@@ -31,7 +31,7 @@ type Config struct {
 	VersionCodeTemplate   string          `env:"version_code_template,required"`
 	VersionCodeRegex      string          `env:"version_code_regex,required"`
 	TagFile               string          `env:"tag_file,required"`
-	TagFileTemplate       string          `env:"tag_file_template,required"`
+	TagFileTemplate       string          `env:"TAG_FILE_TEMPLATE,required"`
 	TagNameSuffix         string          `env:"TAG_NAME_SUFFIX,required"`
 	DebugFlag             bool            `env:"debug_flag,required"`
 }

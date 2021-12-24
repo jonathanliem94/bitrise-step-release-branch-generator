@@ -107,14 +107,6 @@ inputs:
         File containing the tags to be pushed
       is_expand: false
       is_required: true
-  - tag_file_template: "{{.Major}}.{{add .Minor 1}}.{{.Rev}}"
-    opts:
-      title: TAGFILE Template
-      summary: TAGFILE Template
-      description: |
-        Must be a valid go template
-      is_expand: false
-      is_required: true
   - debug_flag: true
     opts:
       title: Debug flag
