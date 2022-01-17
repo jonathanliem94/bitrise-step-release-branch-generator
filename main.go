@@ -236,18 +236,6 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stdout, "LOG: Debug Flag detected.\n")
 	}
 
-	if cfg.ReleaseBranchSuffix == "" {
-		fail("ReleaseBranchSuffix is empty!!!")
-	}
-
-	if cfg.TagNameSuffix == "" {
-		fail("TagNameSuffix is empty!!!")
-	}
-
-	if cfg.TagFileTemplate == "" {
-		fail("TagFileTemplate is empty!!!")
-	}
-
 	pk, err := getGitAuth(cfg)
 	if err != nil {
 		fail("getGitAuth failed: %v\n", err)
